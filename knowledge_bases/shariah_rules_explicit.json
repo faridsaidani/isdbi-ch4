@@ -1,0 +1,30 @@
+[
+    {
+      "rule_id": "SS9_PERMISSIBLE_USE",
+      "standard_ref": "SS 9: 5/1/1",
+      "principle_keywords": ["benefit", "permissible", "Shari'ah", "impermissible act", "lease", "purpose"],
+      "description": "The benefit from an Ijarah (lease) must be permissible by Shari’ah; the leased asset may not be used for an impermissible act or purpose.",
+      "validation_query_template": "Review the proposed clause: '{clause_text}'. Does this clause, particularly concerning the use or purpose of a leased asset, align with the Shari'ah principle that the benefit must be permissible and not for an impermissible act (Ref: SS 9: 5/1/1)? Explain any potential conflicts."
+    },
+    {
+      "rule_id": "GENERAL_NO_RIBA",
+      "standard_ref": "General Shari'ah Principle",
+      "principle_keywords": ["riba", "interest", "excess", "loan", "debt", "charge", "fee", "delay", "payment"],
+      "description": "Transactions must be free from Riba (interest or any impermissible excess in a loan or debt contract, or in certain exchanges).",
+      "validation_query_template": "Examine the proposed clause: '{clause_text}'. Does this clause introduce or condone any form of Riba (interest, impermissible excess on debt/loan, or prohibited exchange terms)? Provide a detailed assessment."
+    },
+    {
+      "rule_id": "GENERAL_NO_GHARAR",
+      "standard_ref": "General Shari'ah Principle",
+      "principle_keywords": ["gharar", "uncertainty", "ambiguity", "risk", "unknown", "specification", "delivery", "price"],
+      "description": "Transactions must be free from excessive uncertainty (Gharar) in key contractual elements (e.g., subject matter, price, delivery) that could lead to dispute.",
+      "validation_query_template": "Assess the proposed clause: '{clause_text}'. Does this clause create or allow excessive uncertainty (Gharar) regarding {specific_aspect_under_review, e.g., 'the subject matter', 'the price', 'delivery terms'} that might lead to disputes? Explain why or why not."
+    },
+    {
+      "rule_id": "SS9_LESSOR_OWNERSHIP",
+      "standard_ref": "SS 9: Pre-requisite for Ijarah",
+      "principle_keywords": ["lessor", "own", "asset", "usufruct", "before leasing"],
+      "description": "The lessor must own the asset or its usufruct before leasing it out.",
+      "validation_query_template": "Consider the proposed clause: '{clause_text}'. Does this clause contradict the Shari'ah requirement that the lessor must own the asset or its usufruct prior to entering into an Ijarah contract (Ref: SS 9)? Explain."
+    }
+  ]

@@ -1,0 +1,21 @@
+AAOIFI Financial Accounting Standard 32: Ijarah
+
+Objective of the standard
+1. The objective of this standard is to set out principles for the classification, recognition,
+measurement, presentation and disclosure for Ijarah (asset Ijarah, including different forms of Ijarah
+Muntahia Bittamleek) transactions entered into by the Islamic financial institutions (the institutions)
+on both ends of the transaction i.e. as a lessor and lessee. An institution shall consider the terms and
+conditions of the contracts and all relevant facts and circumstances when applying this standard and
+shall apply the same on a consistent basis.
+
+Scope
+2. This standard shall apply for accounting and financial reporting for a lessor or lessee, for all Ijarah
+(asset Ijarah, including Ijarah Muntahia Bittamleek (Ijarah MBT)) transactions unless specifically
+excluded under paragraph 3.
+
+Initial recognition of right-of-use asset (Lessee)
+22. At the commencement date, a lessee shall measure the right-of-use asset at cost.
+23. The cost of the right-of-use asset shall comprise:
+a. the “prime cost” of the right-of-use asset (determined in line with the paragraphs 31 or 32);
+b. any initial direct costs incurred by the lessee; and
+c. dismantling or decommissioning costs.
