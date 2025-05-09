@@ -1,11 +1,11 @@
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import Chroma
 
-load_dotenv()
+# load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 class DocumentProcessor:
@@ -13,11 +13,14 @@ class DocumentProcessor:
     Handles loading, processing (chunking), and creating vector stores from PDF documents.
     """
     def __init__(self, embedding_model_name="models/embedding-001",
-                 chunk_size=1200, chunk_overlap=200):
-        if not GOOGLE_API_KEY:
-            raise ValueError("GOOGLE_API_KEY not found in environment variables. Please set it in your .env file.")
+                 chunk_size=1200, chunk_overlap=200, api_key=None):
+        # Use provided API key from UI if available, otherwise use from environment
+        self.api_key = api_key if api_key else GOOGLE_API_KEY
+        
+        if not self.api_key:
+            raise ValueError("GOOGLE_API_KEY not found in environment variables. Please set it in your .env file or provide it to the constructor.")
         try:
-            self.embeddings = GoogleGenerativeAIEmbeddings(model=embedding_model_name, google_api_key=GOOGLE_API_KEY)
+            self.embeddings = GoogleGenerativeAIEmbeddings(model=embedding_model_name, google_api_key=self.api_key)
         except Exception as e:
             raise ValueError(f"Failed to initialize GoogleGenerativeAIEmbeddings. Check API key and model name: {e}")
 

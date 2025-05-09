@@ -7,7 +7,7 @@ from agents.extraction_agent import ExtractionAgent
 from agents.suggestion_agent import SuggestionAgent
 from agents.validation_agent import ValidationAgent
 
-load_dotenv()
+# load_dotenv()
 
 # --- Configuration ---
 PDF_DATA_DIR = "data_pdf" # Base directory for all PDFs
@@ -25,7 +25,7 @@ current_fas_filename_global = None # To track which FAS is loaded
 current_ss_filename_global = None  # To track which SS is loaded
 
 
-def initialize_components(fas_filename: str, ss_filename: str):
+def initialize_components(fas_filename: str, ss_filename: str, api_key: str = None):
     """
     Initializes components based on dynamically selected FAS and SS filenames.
     Returns True if successful, False otherwise.
@@ -98,19 +98,20 @@ def initialize_components(fas_filename: str, ss_filename: str):
     # Re-initialize agents even if only one store changes, as they might depend on both
     print("Re-initializing Agents with current vector stores...")
     if fas_vector_store_global:
-        extraction_agent_global = ExtractionAgent(vector_store=fas_vector_store_global)
+        extraction_agent_global = ExtractionAgent(vector_store=fas_vector_store_global, api_key=api_key)
     else:
         extraction_agent_global = None # Cannot function without FAS store
         print("ERROR: ExtractionAgent cannot be initialized without FAS vector store.")
         return False
 
-    suggestion_agent_global = SuggestionAgent() # Context passed dynamically
+    suggestion_agent_global = SuggestionAgent(api_key=api_key) # Context passed dynamically
 
     if ss_vector_store_global or fas_vector_store_global: # ISCCA needs FAS, SCVA ideally needs SS
         validation_agent_global = ValidationAgent(
             explicit_shariah_rules_path=EXPLICIT_SHARIAH_RULES_PATH,
             ss_vector_store=ss_vector_store_global, # Can be None if SS file failed
-            fas_vector_store=fas_vector_store_global # For ISCCA
+            fas_vector_store=fas_vector_store_global, # For ISCCA
+            api_key=api_key # Pass API key for LLM initialization
         )
     else:
         validation_agent_global = None

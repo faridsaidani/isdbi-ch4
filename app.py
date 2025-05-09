@@ -1,10 +1,10 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import traceback # For more detailed error reporting in the UI
 
 # Load environment variables at the very beginning
-load_dotenv()
+# load_dotenv()
 
 # Check for Google API key
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -131,7 +131,7 @@ else:
         with st.spinner("Initializing AI components with selected standards... This may take a moment."):
             try:
                 # Call initialize_components from main_orchestrator
-                init_success = initialize_components(selected_fas_file_ui, selected_ss_file_ui)
+                init_success = initialize_components(selected_fas_file_ui, selected_ss_file_ui, api_key=GOOGLE_API_KEY)
                 if init_success:
                     st.session_state.components_ready = True
                     st.session_state.selected_fas_on_init = selected_fas_file_ui # Store the files used for this initialization
