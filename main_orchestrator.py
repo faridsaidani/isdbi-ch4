@@ -6,6 +6,7 @@ from utils.document_processor import DocumentProcessor
 from agents.extraction_agent import ExtractionAgent
 from agents.suggestion_agent import SuggestionAgent
 from agents.validation_agent import ValidationAgent
+from agents.shariah_rule_miner_agent import ShariahRuleMinerAgent
 
 load_dotenv()
 
@@ -23,6 +24,8 @@ suggestion_agent_global = None
 validation_agent_global = None
 current_fas_filename_global = None # To track which FAS is loaded
 current_ss_filename_global = None  # To track which SS is loaded
+shariah_rule_miner_agent_global = None # Add this
+
 
 
 def initialize_components(fas_filename: str, ss_filename: str):
@@ -222,6 +225,49 @@ def run_asave_orchestration_flow(section_text_to_analyze: str, fas_name_for_disp
     print("🏁 --- ASAVE Orchestration Flow Completed ---")
     return results
 
+def initialize_srma_agent_if_needed(): # Renamed for clarity
+    """Initializes the SRMA agent if it hasn't been already."""
+    global shariah_rule_miner_agent_global
+    if shariah_rule_miner_agent_global is None:
+        print("Initializing ShariahRuleMinerAgent...")
+        try:
+            shariah_rule_miner_agent_global = ShariahRuleMinerAgent()
+            return True
+        except Exception as e:
+            print(f"ERROR: Could not initialize ShariahRuleMinerAgent: {e}")
+            return False
+    return True
+
+def run_srma_on_selected_ss_files(selected_ss_filenames: list, output_directory: str = "knowledge_bases/generated_rules"):
+    """
+    Runs the Shari'ah Rule Miner Agent on a list of selected SS PDF filenames.
+    Saves individual and a combined JSON output of extracted rules.
+    THIS OUTPUT REQUIRES HUMAN REVIEW AND CURATION.
+    """
+    if not initialize_srma_agent_if_needed():
+        return False
+    if doc_processor_global is None: # Ensure main doc processor is ready
+        print("ERROR: DocumentProcessor not initialized in main components. Cannot process SS files for rule mining.")
+        print("Please ensure main components are initialized first via the UI.")
+        return False
+
+    print(f"\n--- Starting Shari'ah Rule Mining for: {', '.join(selected_ss_filenames)} ---")
+    # The SRMA's main method handles the list and output directory
+    success = shariah_rule_miner_agent_global.mine_rules_from_document_list(
+        ss_document_filenames=selected_ss_filenames,
+        base_output_dir=output_directory
+    )
+    if success:
+        print(f"SRMA process completed. Check the '{output_directory}' directory for generated JSON files.")
+    else:
+        print("SRMA process encountered errors or extracted no rules.")
+    return success
+
+
+FAS_DOCUMENT_PATH = os.path.join(PDF_DATA_DIR, "fas_32_ijarah.pdf")
+SS_DOCUMENT_PATH = os.path.join(PDF_DATA_DIR, "ss_09_ijarah.pdf")
+FAS_DOC_FILENAME = os.path.basename(FAS_DOCUMENT_PATH)
+SS_DOC_FILENAME = os.path.basename(SS_DOCUMENT_PATH)
 
 # Test block for main_orchestrator (can be commented out when running with Streamlit)
 if __name__ == '__main__':
@@ -241,20 +287,40 @@ if __name__ == '__main__':
     init_success = initialize_components(fas_filename=FAS_DOC_FILENAME, ss_filename=SS_DOC_FILENAME)
 
     if init_success:
-        example_section = """
-        23. The cost of the right-of-use asset shall comprise:
-        a. the “prime cost” of the right-of-use asset (determined in line with the paragraphs 31 or 32);
-        b. any initial direct costs incurred by the lessee; and
-        c. dismantling or decommissioning costs.
-        """
-        flow_results = run_asave_orchestration_flow(example_section.strip(), FAS_DOC_FILENAME)
-        print("\n--- ### FINAL ORCHESTRATION RESULTS (Direct Run) ### ---")
-        if flow_results and not flow_results.get("error"):
-            for key, value in flow_results.items():
-                print(f"\n\n➡️ {key.replace('_', ' ').title()}:\n{'-'*30}\n{value}")
-        elif flow_results:
-            print(f"Error in flow: {flow_results.get('error')}")
+        # --- Test SRMA ---
+        print("\n--- Testing Shari'ah Rule Miner Agent (SRMA) on selected files ---")
+        # Example: Mine rules from ss_09_ijarah.pdf and another dummy SS if it exists
+        ss_files_to_mine_test = [SS_DOC_FILENAME]
+        ANOTHER_SS_FILENAME_TEST = "ss_12_sharikah.pdf" # Example
+        ANOTHER_SS_PATH_TEST = os.path.join(PDF_DATA_DIR, ANOTHER_SS_FILENAME_TEST)
+        if not os.path.exists(ANOTHER_SS_PATH_TEST): # Create another dummy if not present
+            with open(ANOTHER_SS_PATH_TEST, "w") as f: f.write(DUMMY_PDF_CONTENT_MAIN.replace("FAS 32 Ijarah", "SS 12 Sharikah Test Content"))
+            print(f"Created dummy PDF for SRMA testing: {ANOTHER_SS_PATH_TEST}")
+        ss_files_to_mine_test.append(ANOTHER_SS_FILENAME_TEST)
+
+        # Ensure the DocumentProcessor (doc_processor_global) is initialized by initialize_components
+        # before calling run_srma_on_selected_ss_files
+        srma_output_dir = "knowledge_bases/generated_srma_output"
+        srma_run_success = run_srma_on_selected_ss_files(
+            selected_ss_filenames=ss_files_to_mine_test,
+            output_directory=srma_output_dir
+        )
+        if srma_run_success:
+            print(f"SRMA Test Completed: Review generated files in '{srma_output_dir}'.")
         else:
-            print("Flow did not produce results directly.")
+            print("SRMA Test Failed or no rules extracted.")
+
+        # ... (existing orchestration flow test for ASAVE) ...
+        if fas_vector_store_global and ss_vector_store_global: # Check if stores are ready for this part
+            example_section_to_analyze = """
+            23. The cost of the right-of-use asset shall comprise:
+            a. the “prime cost” of the right-of-use asset (determined in line with the paragraphs 31 or 32);
+            b. any initial direct costs incurred by the lessee; and
+            c. dismantling or decommissioning costs.
+            """
+            flow_results = run_asave_orchestration_flow(example_section_to_analyze.strip(), FAS_DOC_FILENAME)
+            # (print flow_results as before)
+        else:
+            print("Skipping main ASAVE flow test as vector stores were not properly initialized.")
     else:
-        print("Could not run direct orchestration test because components failed to initialize.")
+        print("Could not run tests because main components failed to initialize.")
