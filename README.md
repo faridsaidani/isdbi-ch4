@@ -330,7 +330,7 @@ This project is licensed under the MIT License.
 
 For questions or support, please contact:
 - **Email**: kf_saidani@esi
-- **GitHub**: [Farid's GitHub](https://github.com/farid)
+- **GitHub**: [Farid's GitHub](https://github.com/faridsaidani)
 
 ---
 
