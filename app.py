@@ -1,43 +1,16 @@
 import streamlit as st
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 import traceback # For more detailed error reporting in the UI
 
 # Load environment variables at the very beginning
 # load_dotenv()
-
-# Check for Google API key
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-API_KEY_ENTERED_IN_UI = False
 
 # Import orchestrator functions after dotenv
 INITIALIZATION_POSSIBLE = False
 initialize_components = None
 run_asave_orchestration_flow = None
 PDF_DATA_DIR = "data_pdf" # Default, will be confirmed from orchestrator
-
-# --- UI Configuration ---
-st.set_page_config(layout="wide", page_title="ASAVE - AAOIFI Standards AI Assistant")
-st.title("🕋 ASAVE: AAOIFI Standard Augmentation & Validation Engine (MVP)")
-st.caption("Leveraging Gemini & Langchain to enhance AAOIFI Financial Accounting Standards")
-
-# API Key input section if not found in .env
-if not GOOGLE_API_KEY:
-    st.warning("⚠️ GOOGLE_API_KEY not found in .env file")
-    
-    with st.expander("Enter Google API Key", expanded=True):
-        api_key_input = st.text_input(
-            "Enter your Google API Key:",
-            type="password",
-            help="Your key will be used for this session only and won't be stored permanently"
-        )
-        
-        if api_key_input:
-            # Set the API key in the environment for this session
-            os.environ["GOOGLE_API_KEY"] = api_key_input
-            GOOGLE_API_KEY = api_key_input
-            API_KEY_ENTERED_IN_UI = True
-            st.success("✅ API Key added for this session")
 
 try:
     from main_orchestrator import initialize_components, run_asave_orchestration_flow, PDF_DATA_DIR as orchestrator_pdf_dir
@@ -46,10 +19,13 @@ try:
 except ImportError as e:
     st.error(f"Failed to import orchestrator components. Ensure all files are in place: {e}")
 except ValueError as e: # Catches API key issues from BaseAgent or DocumentProcessor
-    if not GOOGLE_API_KEY:
-        st.error("Please enter a valid Google API Key above to continue.")
-    else:
-        st.error(f"Initialization Value Error: {e}. Check your API key or .env file.")
+    st.error(f"Initialization Value Error: {e}. Check .env file and GOOGLE_API_KEY.")
+
+
+# --- UI Configuration ---
+st.set_page_config(layout="wide", page_title="ASAVE - AAOIFI Standards AI Assistant")
+st.title("🕋 ASAVE: AAOIFI Standard Augmentation & Validation Engine (MVP)")
+st.caption("Leveraging Gemini & Langchain to enhance AAOIFI Financial Accounting Standards")
 
 # --- State Management ---
 if 'components_ready' not in st.session_state:
@@ -64,10 +40,8 @@ if 'analysis_results' not in st.session_state:
 # --- File Selection Sidebar ---
 st.sidebar.header("📚 Standard Selection & Initialization")
 
-if not GOOGLE_API_KEY:
-    st.sidebar.error("Please enter a Google API Key above to proceed.")
-elif not INITIALIZATION_POSSIBLE:
-    st.sidebar.error("Core system files might be missing. Cannot proceed.")
+if not INITIALIZATION_POSSIBLE:
+    st.sidebar.error("Core system files might be missing or API key issue. Cannot proceed.")
 else:
     # List available PDF files in the data_pdf directory
     available_pdfs = []
@@ -89,7 +63,6 @@ else:
             with open(dummy_ss_path, "w") as f: f.write(DUMMY_PDF_CONTENT_APP)
         if not available_pdfs: # if still no pdfs after trying to create dummies
              available_pdfs = sorted([f for f in os.listdir(PDF_DATA_DIR) if f.lower().endswith('.pdf')])
-
 
 
     # Default selections logic (more robust)
@@ -131,7 +104,7 @@ else:
         with st.spinner("Initializing AI components with selected standards... This may take a moment."):
             try:
                 # Call initialize_components from main_orchestrator
-                init_success = initialize_components(selected_fas_file_ui, selected_ss_file_ui, api_key=GOOGLE_API_KEY)
+                init_success = initialize_components(selected_fas_file_ui, selected_ss_file_ui)
                 if init_success:
                     st.session_state.components_ready = True
                     st.session_state.selected_fas_on_init = selected_fas_file_ui # Store the files used for this initialization

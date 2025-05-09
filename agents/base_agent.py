@@ -5,25 +5,23 @@ from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser # For simple string output
 from langchain.chains import LLMChain # Still useful for simple chains
 
+# load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 class BaseAgent:
     """
     A base class for AI agents, initializing the Gemini LLM.
     """
-    def __init__(self, model_name="gemini-2.0-flash", temperature=0.2, system_message=None, api_key=None): # Using flash for speed
-        # Use provided API key from UI if available, otherwise use from environment
-        self.api_key = api_key if api_key else GOOGLE_API_KEY
-        
-        if not self.api_key:
-            raise ValueError("GOOGLE_API_KEY not found. Please set it in your .env file or provide it to the constructor.")
+    def __init__(self, model_name="gemini-2.0-flash", temperature=0.2, system_message=None): # Using flash for speed
+        if not GOOGLE_API_KEY:
+            raise ValueError("GOOGLE_API_KEY not found. Please set it in your .env file.")
         try:
             # For ChatGoogleGenerativeAI, system messages are part of the prompt or handled differently.
             # We'll add a system instruction to the prompt directly if needed.
             self.llm = ChatGoogleGenerativeAI(
                 model=model_name,
                 temperature=temperature,
-                google_api_key=self.api_key,
+                google_api_key=GOOGLE_API_KEY,
                 # convert_system_message_to_human=True # May be needed depending on Langchain version and Gemini model
             )
         except Exception as e:
